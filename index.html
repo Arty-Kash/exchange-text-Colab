@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>最小構成スタートキット</title>
+</head>
+<body>
+    <h1>名前を送ると挨拶が返るアプリ</h1>
+    
+    <input type="text" id="userName" placeholder="名前を入力">
+    <button onclick="sendRequest()">サーバーへ送信</button>
+
+    <p id="response">ここに結果が表示されます</p>
+
+<script>
+        async function sendRequest() {
+            const name = document.getElementById('userName').value;
+            const resElement = document.getElementById('response');
+            
+            // 1. あなたのngrok URLに書き換え（末尾の /hello を忘れずに）
+            const url = "https://nikita-locular-evidently.ngrok-free.dev/hello";
+
+            resElement.innerText = "通信中...";
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name }) // Python側の UserData(name: str) に対応
+                });
+
+                if (!response.ok) throw new Error("サーバーエラー");
+
+                const data = await response.json();
+                
+                // 2. Pythonの return {"message": ...} の "message" と合わせる
+                if (data.message) {
+                    resElement.innerText = data.message;
+                } else {
+                    resElement.innerText = "データ形式が正しくありません";
+                    console.log("受信データ:", data); // デバッグ用にコンソールに表示
+                }
+
+            } catch (e) {
+                resElement.innerText = "エラー: " + e.message;
+            }
+        }
+    </script>
+</body>
+</html>
