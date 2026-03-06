@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 # --- 設定 ---
-NGROK_AUTH_TOKEN = "39zaWf2ZjAF5ns7LTsJ14H0yK2j_77WxJ1YDcFekDhiJT2Cem"
+NGROK_AUTH_TOKEN = "ngrok auth token"
 ngrok.set_auth_token(NGROK_AUTH_TOKEN)
 
 app = FastAPI()
@@ -30,3 +30,4 @@ nest_asyncio.apply()
 config = uvicorn.Config(app, host="0.0.0.0", port=8000)
 server = uvicorn.Server(config)
 await server.serve()
+
