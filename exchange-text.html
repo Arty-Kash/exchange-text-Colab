@@ -8,40 +8,54 @@
     <h1>名前を送ると挨拶が返るアプリ</h1>
     
     <input type="text" id="userName" placeholder="名前を入力">
+    
     <button onclick="sendRequest()">サーバーへ送信</button>
 
     <p id="response">ここに結果が表示されます</p>
 
-<script>
+    <script>
+        // サーバーと通信を行うための非同期関数（async）
         async function sendRequest() {
+            // 入力欄（input）から入力された値を取得
             const name = document.getElementById('userName').value;
+            // 結果を表示する要素（pタグ）を取得
             const resElement = document.getElementById('response');
             
-            // 1. あなたのngrok URLに書き換え（末尾の /hello を忘れずに）
+            // 1. 通信先のURL（Python側で発行された ngrok URL）を指定
+            // /hello は Python側の @app.post("/hello") に対応しています
             const url = "https://nikita-locular-evidently.ngrok-free.dev/hello";
 
+            // 通信が始まったことをユーザーに知らせる
             resElement.innerText = "通信中...";
 
             try {
+                // Fetch APIを使って、指定したURLにデータを送信（POSTリクエスト）
                 const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name }) // Python側の UserData(name: str) に対応
+                    method: 'POST', // 送信メソッドをPOSTに指定
+                    headers: { 'Content-Type': 'application/json' }, // 送るデータがJSON形式であることを伝える
+                    // JavaScriptのオブジェクトをJSON文字列に変換して送信
+                    // Python側の UserData(name: str) という定義と名前を合わせる必要があります
+                    body: JSON.stringify({ name: name }) 
                 });
 
+                // 通信自体は成功しても、サーバー側でエラー（404や500など）が出た場合の処理
                 if (!response.ok) throw new Error("サーバーエラー");
 
+                // サーバーから返ってきたレスポンス（JSON）をJavaScriptのオブジェクトに変換
                 const data = await response.json();
                 
-                // 2. Pythonの return {"message": ...} の "message" と合わせる
+                // 2. Python側の return {"message": ...} で定義された "message" キーの中身を取り出す
                 if (data.message) {
+                    // 画面上の表示をサーバーからのメッセージに書き換える
                     resElement.innerText = data.message;
                 } else {
+                    // 想定外の形式でデータが返ってきた場合のデバッグ処理
                     resElement.innerText = "データ形式が正しくありません";
-                    console.log("受信データ:", data); // デバッグ用にコンソールに表示
+                    console.log("受信データ:", data); 
                 }
 
             } catch (e) {
+                // URLの間違いやネットワーク断絶など、通信に失敗した場合の処理
                 resElement.innerText = "エラー: " + e.message;
             }
         }
